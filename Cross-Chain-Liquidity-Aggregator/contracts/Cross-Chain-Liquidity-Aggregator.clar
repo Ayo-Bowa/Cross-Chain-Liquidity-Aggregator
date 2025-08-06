@@ -414,3 +414,71 @@
     proposal-type: uint
   }
 )
+
+(define-map user-votes
+  { user: principal, proposal-id: uint }
+  {
+    vote: bool,
+    voting-power: uint,
+    timestamp: uint
+  }
+)
+
+(define-map governance-tokens
+  { user: principal }
+  {
+    balance: uint,
+    delegated-to: (optional principal),
+    voting-power: uint
+  }
+)
+
+;; INSURANCE SYSTEM
+(define-map insurance-policies
+  { policy-id: uint }
+  {
+    holder: principal,
+    coverage-amount: uint,
+    premium-paid: uint,
+    coverage-type: uint,
+    start-time: uint,
+    end-time: uint,
+    is-active: bool
+  }
+)
+
+(define-map insurance-claims
+  { claim-id: uint }
+  {
+    policy-id: uint,
+    claimant: principal,
+    claim-amount: uint,
+    claim-type: uint,
+    evidence-hash: (buff 32),
+    status: uint,
+    submitted-at: uint
+  }
+)
+
+;; NFT COLLATERAL SYSTEM
+(define-map nft-collateral
+  { nft-id: uint }
+  {
+    owner: principal,
+    collection-address: principal,
+    token-id: uint,
+    appraised-value: uint,
+    is-collateralized: bool,
+    loan-id: (optional uint)
+  }
+)
+
+(define-map nft-collections
+  { collection: principal }
+  {
+    floor-price: uint,
+    is-approved: bool,
+    collateral-factor: uint,
+    last-price-update: uint
+  }
+)

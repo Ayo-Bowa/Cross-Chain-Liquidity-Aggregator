@@ -482,3 +482,66 @@
     last-price-update: uint
   }
 )
+
+;; CROSS-CHAIN BRIDGE SYSTEM
+(define-map bridge-transactions
+  { tx-id: uint }
+  {
+    sender: principal,
+    recipient: (buff 20),
+    token: principal,
+    amount: uint,
+    target-chain: uint,
+    status: uint,
+    created-at: uint,
+    completed-at: (optional uint)
+  }
+)
+(define-map supported-chains
+  { chain-id: uint }
+  {
+    name: (string-ascii 32),
+    is-active: bool,
+    bridge-fee-bps: uint,
+    confirmation-blocks: uint
+  }
+)
+
+;; NEW COUNTERS
+(define-data-var next-loan-id uint u1)
+(define-data-var next-farm-id uint u1)
+(define-data-var next-proposal-id uint u1)
+(define-data-var next-policy-id uint u1)
+(define-data-var next-claim-id uint u1)
+(define-data-var next-nft-id uint u1)
+(define-data-var next-bridge-tx-id uint u1)
+(define-data-var next-oracle-feed-id uint u1)
+
+;; LENDING & BORROWING SYSTEM
+(define-public (create-lending-pool 
+  (token principal) 
+  (collateral-factor uint) 
+  (liquidation-threshold uint)
+)
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (asserts! (is-token-whitelisted token) ERR-INVALID-TOKEN)
+    (asserts! (<= collateral-factor u8000) ERR-INVALID-AMOUNT) ;; Max 80% collateral factor
+    (asserts! (<= liquidation-threshold u9000) ERR-INVALID-AMOUNT) ;; Max 90% liquidation threshold
+    
+    (map-set lending-pools
+      { token: token }
+      {
+        total-supplied: u0,
+        total-borrowed: u0,
+        supply-rate: u500, ;; 5% default
+        borrow-rate: u800, ;; 8% default
+        collateral-factor: collateral-factor,
+        liquidation-threshold: liquidation-threshold,
+        is-active: true
+      }
+    )
+    (ok token)
+  )
+)
+

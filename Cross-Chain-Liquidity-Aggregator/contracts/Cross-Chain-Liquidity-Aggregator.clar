@@ -68,3 +68,45 @@
     rewards-token: (optional principal)
   }
 )
+
+(define-map route-configuration
+  { route-id: uint }
+  {
+    name: (string-ascii 32),
+    path: (list 10 uint),
+    is-optimized: bool
+  }
+)
+
+(define-map user-referrals
+  { user: principal }
+  { referrer: principal, fees-earned: uint }
+)
+
+(define-map token-whitelist
+  { token: principal }
+  { is-whitelisted: bool, decimals: uint }
+)
+
+;; Counters
+(define-data-var next-pool-id uint u1)
+(define-data-var next-strategy-id uint u1)
+(define-data-var next-route-id uint u1)
+
+;; Protocol status functions
+(define-read-only (get-protocol-status)
+  {
+    paused: (var-get protocol-paused),
+    fee-bps: (var-get protocol-fee-bps),
+    treasury: (var-get treasury-address),
+    referral-fee-bps: (var-get referral-fee-bps),
+    fees-accumulated: (var-get protocol-fees-accumulated)
+  }
+)
+
+(define-public (set-protocol-paused (paused bool))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (ok (var-set protocol-paused paused))
+  )
+)
